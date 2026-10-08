@@ -122,7 +122,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
 function chk(){$("goBtn").disabled=!($("sid").value.trim()&&$("nm").value.trim())}
 $("sid").oninput=()=>{$("sid").value=$("sid").value.replace(/\D/g,"");chk()};$("nm").oninput=chk;
 
-const API_URL="https://script.google.com/macros/s/AKfycbxeUzKOVpCoduKd0JhAuiSDDVp0qxJOqe9JINUbqr9PDtCjbst4TvbZLkcnCb8jvgrS/exec"; // 구글 Apps Script 웹 앱 주소 (배포 후 붙여 넣기)
+const API_URL="https://script.google.com/macros/s/AKfycbxw4EN7qxqcBC7A4uYKkznMIPGIwi6H21OVgDShvcYKP_qVhOzjIYfvzhmrVkMup5Gh/exec"; // 구글 Apps Script 웹 앱 주소 (배포 후 붙여 넣기)
 function api(params){return fetch(API_URL+"?"+new URLSearchParams(params)).then(r=>r.json())}
 function warn(t){const m=$("startMsg");m.textContent=t;m.classList.toggle("hidden",!t)}
 $("goBtn").onclick=async()=>{
