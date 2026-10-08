@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>사이버보안과 퀴즈 이벤트</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f7fb;--card:#fff;--text:#14213d;--sub:#5b6b86;--main:#1f6feb;--ok:#16a34a;--no:#dc2626;--line:#dbe3f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1526;--card:#16213a;--text:#eaf0fb;--sub:#9fb0cc;--main:#5b9dff;--ok:#4ade80;--no:#f87171;--line:#2a3a5c}}
+:root[data-theme="dark"]{--bg:#0d1526;--card:#16213a;--text:#eaf0fb;--sub:#9fb0cc;--main:#5b9dff;--ok:#4ade80;--no:#f87171;--line:#2a3a5c}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans KR",system-ui,-apple-system,sans-serif;line-height:1.6}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin-top:16px}
+h1{font-size:1.5rem;margin:8px 0 4px}h2{font-size:1.1rem;margin:0 0 12px}
+.sub{color:var(--sub);font-size:.92rem}
+.rules{list-style:none;padding:0;margin:0}
+.rules li{padding:8px 0;border-bottom:1px dashed var(--line)}.rules li:last-child{border:0}
+.tag{display:inline-block;background:var(--main);color:#fff;border-radius:999px;padding:2px 10px;font-size:.8rem;margin-right:6px}
+input[type=text]{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font-size:1rem;margin-top:8px}
+button{font:inherit;cursor:pointer}
+.btn{width:100%;padding:14px;border:0;border-radius:12px;background:var(--main);color:#fff;font-weight:700;font-size:1.05rem;margin-top:16px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.opt{display:block;width:100%;text-align:left;padding:14px;margin-top:10px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--text)}
+.opt.sel{border-color:var(--main)}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,transparent)}
+.opt.wrong{border-color:var(--no);background:color-mix(in srgb,var(--no) 15%,transparent)}
+.ox{display:flex;gap:12px}.ox .opt{text-align:center;font-size:2rem;font-weight:800}
+.res{margin-top:14px;padding:14px;border-radius:12px;font-weight:700}
+.res.ok{color:var(--ok);border:2px solid var(--ok)}.res.no{color:var(--no);border:2px solid var(--no)}
+.res p{margin:6px 0 0;font-weight:400;color:var(--text);font-size:.92rem}
+.ticket{text-align:center;border:3px dashed var(--ok);border-radius:16px;padding:20px}
+.ticket .n{font-size:3rem;font-weight:800;color:var(--ok)}
+.ticket .n.zero{color:var(--no)}
+.meta{font-size:.88rem;color:var(--sub);margin-top:8px}
+.hidden{display:none}
+.prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden}.prog i{display:block;height:100%;background:var(--main);transition:width .3s}
+</style>
+</head>
+<body>
+<main>
+<h1>🔐 사이버보안과 퀴즈 이벤트</h1>
+<p class="sub">문제를 맞히고 상품 뽑기권을 받아가십시오!</p>
+
+<!-- 시작 화면 -->
+<section id="start" class="card">
+  <h2>📋 참여 방법</h2>
+  <ul class="rules">
+    <li>① 1인당 <b>문제 2개</b>가 <b>랜덤</b>으로 출제됩니다.</li>
+    <li>② 맞힌 개수에 따라 뽑기권을 받습니다.<br>
+      <span class="tag">2문제 정답</span>뽑기권 <b>2장</b><br>
+      <span class="tag">1문제 정답</span>뽑기권 <b>1장</b></li>
+    <li>③ 마지막에 나오는 <b>'정답입니다' 결과 화면</b>을 학생회 부스에서 보여주면 확인 후 <b>뽑기</b>를 진행합니다.</li>
+    <li>④ 참여는 <b>1인 1회</b>입니다. 화면을 새로고침하면 문제가 바뀌므로 결과 화면을 닫지 마십시오!</li>
+  </ul>
+  <input type="text" id="sid" placeholder="학번 (예: 2537018)" inputmode="numeric" maxlength="12">
+  <input type="text" id="nm" placeholder="이름" maxlength="10">
+  <button class="btn" id="goBtn" disabled>퀴즈 시작</button>
+</section>
+
+<!-- 문제 화면 -->
+<section id="quiz" class="card hidden">
+  <div class="prog"><i id="bar" style="width:0"></i></div>
+  <p class="sub" id="qno" style="margin:10px 0 4px"></p>
+  <h2 id="qtext"></h2>
+  <div id="opts"></div>
+  <div id="res" class="res hidden"></div>
+  <button class="btn hidden" id="nextBtn">다음</button>
+</section>
+
+<!-- 결과 화면 -->
+<section id="done" class="card hidden">
+  <h2>🎉 결과 확인</h2>
+  <div id="again" class="res no hidden" style="margin:0 0 12px">이미 참여하셨습니다. 퀴즈는 1인 1회만 참여할 수 있습니다.<p>아래 결과 화면을 학생회 부스에서 보여주십시오.</p></div>
+  <div class="ticket">
+    <div id="verdict" style="font-weight:700"></div>
+    <div class="n" id="cnt"></div>
+    <div id="cap"></div>
+  </div>
+  <p class="meta" id="who"></p>
+  <p class="meta" id="stamp"></p>
+  <p class="sub" style="margin-top:14px">👉 이 화면을 <b>학생회 부스</b>에서 보여주십시오. 확인 후 뽑기를 진행해 드리겠습니다.</p>
+</section>
+</main>
+
+<script>
+const POOL=[
+ {t:"ox",q:"공용 와이파이를 사용할 때는 중요한 개인정보나 금융 정보를 입력하는 작업을 가급적 피하는 것이 안전하다.",o:["O","X"],a:0,e:"공용 와이파이는 통신 내용이 노출될 수 있어 중요한 정보 입력은 피하는 것이 좋습니다."},
+ {t:"mc",q:"다음 중 가장 강력한 비밀번호에 가까운 것은?",o:["12345678","qwer1234","M!7q#2Zp@91","password123"],a:2,e:"길이가 충분하고 대소문자·숫자·특수문자가 섞인 예측하기 어려운 비밀번호가 강력합니다."},
+ {t:"mc",q:"사이버보안과 학생이 실습실 PC에서 이상한 팝업창을 발견했다. 가장 먼저 할 행동으로 적절한 것은?",o:["팝업을 계속 클릭해본다","인터넷에서 아무 프로그램이나 받아 해결한다","상황을 기록하고 담당자에게 알린다","친구 PC에서도 똑같이 해본다"],a:2,e:"함부로 건드리지 않고 상황을 기록한 뒤 담당자에게 알리는 것이 올바른 대응입니다."}
+];
+const KEY="cyberquiz_v1";
+const $=id=>document.getElementById(id);
+let st=null,picked=[],cur=0,locked=false;
+if(/[?&]reset=1/.test(location.search)){try{localStorage.removeItem(KEY)}catch(e){}}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+function chk(){$("goBtn").disabled=!($("sid").value.trim()&&$("nm").value.trim())}
+$("sid").oninput=chk;$("nm").oninput=chk;
+
+$("goBtn").onclick=()=>{
+  if(load()){location.reload();return;} // 다른 창에서 이미 참여한 경우
+  const ids=[0,1,2].sort(()=>Math.random()-.5).slice(0,2); // 랜덤 2문제
+  st={sid:$("sid").value.trim(),nm:$("nm").value.trim(),ids:ids,ans:[],done:false};
+  save();begin();
+};
+function begin(){
+  picked=st.ids.map(i=>POOL[i]);cur=st.ans.length;
+  $("start").classList.add("hidden");$("quiz").classList.remove("hidden");show();
+}
+function show(){
+  locked=false;const p=picked[cur];
+  $("qno").textContent=`문제 ${cur+1} / 2 · ${p.t==="ox"?"OX 퀴즈":"객관식"}`;
+  $("bar").style.width=(cur/2*100)+"%";
+  $("qtext").textContent=p.q;
+  $("res").classList.add("hidden");$("nextBtn").classList.add("hidden");
+  const box=$("opts");box.innerHTML="";box.className=p.t==="ox"?"ox":"";
+  p.o.forEach((txt,i)=>{
+    const b=document.createElement("button");b.className="opt";
+    b.textContent=p.t==="ox"?txt:`${"ABCD"[i]}. ${txt}`;
+    b.onclick=()=>answer(i);box.appendChild(b);
+  });
+}
+function answer(i){
+  if(locked)return;locked=true;
+  const p=picked[cur],ok=i===p.a,btns=$("opts").children;
+  btns[p.a].classList.add("right");if(!ok)btns[i].classList.add("wrong");
+  st.ans.push(i);
+  if(cur===1){st.done=true;st.at=Date.now();}
+  save();
+  const r=$("res");r.className="res "+(ok?"ok":"no");
+  r.innerHTML=(ok?"⭕ 정답입니다!":"❌ 오답입니다.")+`<p>${p.e}</p>`;
+  $("nextBtn").textContent=cur===1?"결과 보기":"다음 문제";
+  $("nextBtn").classList.remove("hidden");
+}
+$("nextBtn").onclick=()=>{
+  if(cur===0){cur=1;show();return;}
+  showDone(false);
+};
+function showDone(again){
+  picked=st.ids.map(i=>POOL[i]);
+  const score=st.ans.reduce((a,x,i)=>a+(x===picked[i].a?1:0),0);
+  $("start").classList.add("hidden");$("quiz").classList.add("hidden");$("done").classList.remove("hidden");
+  $("again").classList.toggle("hidden",!again);
+  $("verdict").textContent=score===2?"✅ 정답입니다! (2문제 모두 정답)":score===1?"✅ 정답입니다! (1문제 정답)":"😢 아쉽게도 모두 오답입니다";
+  $("cnt").textContent=score+"장";$("cnt").className="n"+(score?"":" zero");
+  $("cap").textContent=score?"뽑기권 획득!":"뽑기권이 없습니다. 다음 기회에 도전해 주십시오!";
+  $("who").textContent=`학번 ${st.sid} · ${st.nm}`;
+  $("stamp").textContent="인증 시각: "+new Date(st.at).toLocaleString("ko-KR");
+}
+st=load();
+if(st&&st.ids){ if(st.done||st.ans.length>=2){st.done=true;showDone(true)} else begin(); }
+</script>
+</body>
+</html>
